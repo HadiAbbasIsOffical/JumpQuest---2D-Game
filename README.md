@@ -6,6 +6,10 @@ Welcome to **JumpQuest**, a 2D platformer game currently under development. In t
 
 We're actively working on adding more exciting features and polishing the gameplay experience. Stay tuned for updates, as we continue to develop **JumpQuest** into a fun, action-packed platformer!
 
+## 🧠 **Main Idea of This Game**
+
+This game is an **Object-Oriented Programming (OOP) project** developed by three group members: **Hadi**, **Minaal**, and **Mishaal** from **FAST Karachi University**. We aim to implement core OOP concepts such as classes, inheritance, and polymorphism while building a fun and engaging platformer game.
+
 ## 🔮 **Features to be Added**
 
 As the development progresses, here are some of the key features you can expect in upcoming updates:
