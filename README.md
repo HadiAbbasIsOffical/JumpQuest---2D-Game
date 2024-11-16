@@ -8,7 +8,7 @@ We're actively working on adding more exciting features and polishing the gamepl
 
 ## 🧠 **Main Idea of This Game**
 
-This game is an **Object-Oriented Programming (OOP) project** developed by three group members: **Hadi**, **Minaal**, and **Mishaal** from **FAST Karachi University**. We aim to implement core OOP concepts such as classes, inheritance, and polymorphism while building a fun and engaging platformer game.
+This game is an **Object-Oriented Programming (OOP) project** developed by three group members: **Hadi**, **Minaal**, and **Mishaal** from **FAST University KHI**. We aim to implement core OOP concepts such as classes, inheritance, and polymorphism while building a fun and engaging platformer game.
 
 ## 🔮 **Features to be Added**
 
