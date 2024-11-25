@@ -3,159 +3,44 @@
 
 #include <raylib.h>
 #include <vector>
-#include <cstdlib>  // For random direction 
-#include <ctime>    // For random logic, not implemented yet , random coin generation
-class Player
-{
+#include <string>
+
+class Player {
 public:
     Vector2 position;
-    float speed = 5.0f;
-    float jumpHeight = 10.0f;
-    bool isJumping = false;
-    float gravity = 0.5f;
-    float velocityY = 0.0f;
-
+    float speed;
+    float jumpHeight;
+    bool isJumping;
+    float gravity;
+    float velocityY;
     Rectangle boundingBox;
+    Color color;
 
-    Player(Vector2 startPos)
-    {
-        position = startPos;
-        boundingBox = {position.x, position.y, 40, 40}; // player size :: 40x40
-    }
+    Player(Vector2 startPos, Color playerColor)
+        : position(startPos), speed(5.0f), jumpHeight(10.0f), isJumping(false),
+          gravity(0.5f), velocityY(0.0f), boundingBox{startPos.x, startPos.y, 40, 40},
+          color(playerColor) {}
 
-void Update(const std::vector<Rectangle>& platforms)
-{
-    // Player movement (left-right)
-    if (IsKeyDown(KEY_LEFT)) position.x -= speed;
-    if (IsKeyDown(KEY_RIGHT)) position.x += speed;
+    void Update(const std::vector<Rectangle>& platforms) {
+        if (IsKeyDown(KEY_LEFT)) position.x -= speed;
+        if (IsKeyDown(KEY_RIGHT)) position.x += speed;
 
-    // Prevent player from going off the screen horizontally
-    if (position.x < 0) position.x = 0;
-    if (position.x > GetScreenWidth() - boundingBox.width) position.x = GetScreenWidth() - boundingBox.width;
+        if (position.x < 0) position.x = 0;
+        if (position.x > GetScreenWidth() - boundingBox.width)
+            position.x = GetScreenWidth() - boundingBox.width;
 
-    // Jump logic
-    if (IsKeyPressed(KEY_SPACE) && !isJumping)  
-    {
-        isJumping = true;
-        velocityY = -jumpHeight;  
-    }
-
-    // Gravity and fall handling
-    if (isJumping)
-    {
-        velocityY += gravity;  // Apply gravity
-        position.y += velocityY; 
-
-        bool onGround = false;
-        for (const auto& platform : platforms)
-        {
-            if (CheckCollisionRecs(boundingBox, platform) && velocityY >= 0) 
-            {
-                position.y = platform.y - boundingBox.height;
-                isJumping = false; 
-                velocityY = 0; 
-                onGround = true; 
-                break; // Exit the loop as we found a platform to land on
-            }
+        if (IsKeyPressed(KEY_SPACE) && !isJumping) {
+            isJumping = true;
+            velocityY = -jumpHeight;
         }
 
-        if (!onGround && position.y >= GetScreenHeight() - boundingBox.height)
-        {
-            position.y = GetScreenHeight() - boundingBox.height;
-            isJumping = false;  
-        }
-    }
-
-    boundingBox.x = position.x; 
-    boundingBox.y = position.y;
-}
-
-
-    void Draw()
-    {
-        DrawRectangleRec(boundingBox, BLUE);
-    }
-};
-
-class Coin
-{
-public:
-    Vector2 position;
-    Rectangle boundingBox;
-    bool isCollected = false;
-
-    Coin(Vector2 pos)
-    {
-        position = pos;
-        boundingBox = {position.x, position.y, 20, 20}; // Coin size 20x20
-    }
-
-    void Draw()
-    {
-        if (!isCollected)
-        {
-            DrawRectangleRec(boundingBox, YELLOW);
-        }
-    }
-};
-
-class Platform
-{
-public:
-    Vector2 position;
-    Rectangle boundingBox;
-
-    Platform(Vector2 pos, float width)
-    {
-        position = pos;
-        boundingBox = {position.x, position.y, width, 10}; // Platform size 10px high
-    }
-
-    void Draw()
-    {
-        DrawRectangleRec(boundingBox, DARKGRAY);
-    }
-};
-
-class Enemy
-{
-public:
-    Vector2 position;
-    float speed = 3.0f;
-    int direction = 1; // 1 for moving right, -1 for moving left
-    float velocityY = 0.0f;
-    bool isJumping = false;
-    float gravity = 0.5f;
-    Rectangle boundingBox;
-
-    Enemy(Vector2 pos)
-    {
-        position = pos;
-        boundingBox = {position.x, position.y, 20, 20}; //enemy size currently
-    }
-
-    void Update(const std::vector<Rectangle>& platforms)
-    {
-        position.x += direction * speed;
-
-        // Prevent enemy from going off-screen
-        if (position.x < 0 || position.x > GetScreenWidth() - boundingBox.width)
-        {
-            direction *= -1; 
-        }
-
-        // Gravity and jumping logic for enemy
-        if (isJumping)
-        {
+        if (isJumping) {
             velocityY += gravity;
             position.y += velocityY;
 
-            // Check for collision with platforms
             bool onGround = false;
-            for (const auto& platform : platforms)
-            {
-                if (CheckCollisionRecs(boundingBox, platform) && velocityY >= 0)
-                {
+            for (const auto& platform : platforms) {
+                if (CheckCollisionRecs(boundingBox, platform) && velocityY >= 0) {
                     position.y = platform.y - boundingBox.height;
                     isJumping = false;
                     velocityY = 0;
@@ -164,9 +49,102 @@ public:
                 }
             }
 
-            if (!onGround && position.y >= GetScreenHeight() - boundingBox.height)
-            {
-                position.y = GetScreenHeight() - boundingBox.height;
+            if (!onGround && position.y >= float(GetScreenHeight() - boundingBox.height)) {
+                position.y = float(GetScreenHeight() - boundingBox.height);
+                isJumping = false;
+            }
+        } else {
+            bool onGround = false;
+            for (const auto& platform : platforms) {
+                if (CheckCollisionRecs(boundingBox, platform)) {
+                    position.y = platform.y - boundingBox.height;
+                    velocityY = 0;
+                    onGround = true;
+                    break;
+                }
+            }
+
+            if (!onGround) {
+                velocityY += gravity;
+                position.y += velocityY;
+            }
+        }
+
+        boundingBox.x = position.x;
+        boundingBox.y = position.y;
+    }
+
+    void Draw() const {
+        DrawRectangleRec(boundingBox, color);
+    }
+};
+
+
+class Coin {
+public:
+    Vector2 position;
+    Rectangle boundingBox;
+    bool isCollected;
+    Coin(Vector2 pos)
+        : position(pos), boundingBox{pos.x, pos.y, 20, 20}, isCollected(false) {}
+
+    void Draw() const {
+        if (!isCollected) {
+            DrawRectangleRec(boundingBox, YELLOW);
+        }
+    }
+};
+class Platform {
+public:
+    Vector2 position;
+    Rectangle boundingBox;
+
+    Platform(Vector2 pos, float width)
+        : position(pos), boundingBox{pos.x, pos.y, width, 10} {}
+
+    void Draw() const {
+        DrawRectangleRec(boundingBox, DARKGRAY);
+    }
+};
+
+class Enemy {
+public:
+    Vector2 position;
+    float speed;
+    int direction;
+    float velocityY;
+    bool isJumping;
+    float gravity;
+    Rectangle boundingBox;
+
+    Enemy(Vector2 pos, float enemySpeed)
+        : position(pos), speed(enemySpeed), direction(1), velocityY(0.0f),
+          isJumping(false), gravity(0.5f), boundingBox{pos.x, pos.y, 20, 20} {}
+
+    void Update(const std::vector<Rectangle>& platforms) {
+        position.x += direction * speed;
+
+        if (position.x < 0 || position.x > GetScreenWidth() - boundingBox.width) {
+            direction *= -1;
+        }
+
+        if (isJumping) {
+            velocityY += gravity;
+            position.y += velocityY;
+
+            bool onGround = false;
+            for (const auto& platform : platforms) {
+                if (CheckCollisionRecs(boundingBox, platform) && velocityY >= 0) {
+                    position.y = platform.y - boundingBox.height;
+                    isJumping = false;
+                    velocityY = 0;
+                    onGround = true;
+                    break;
+                }
+            }
+
+            if (!onGround && position.y >= float(GetScreenHeight() - boundingBox.height)) {
+                position.y = float(GetScreenHeight() - boundingBox.height);
                 isJumping = false;
             }
         }
@@ -175,117 +153,155 @@ public:
         boundingBox.y = position.y;
     }
 
-    void Draw()
-    {
+    void Draw() const {
         DrawRectangleRec(boundingBox, RED);
     }
 };
 
-class Game
-{
+class Game {
 public:
     Player player;
     std::vector<Coin> coins;
+    int coinCounts;
     std::vector<Platform> platforms;
     std::vector<Enemy> enemies;
-    int score = 0;
-    bool running=true;
+    int score;
+    bool running;
+    int level;
+    int difficulty;
+    bool levelCompleted;
+    bool gameover;
 
-    Game() : player(Vector2{100, GetScreenHeight() - 100}) {}
+    Game(Color playerColor = BLUE)
+        : player(Vector2{100, float(GetScreenHeight() - 100)}, playerColor),
+          score(0), running(true), level(1), difficulty(1), levelCompleted(false) {}
+    
+    void SetDifficulty(int difficultyLevel) {
+    difficulty = difficultyLevel;
+}
 
-    void Init()     //this function just initilizes all the entities of the game ^-^
-    {
-        platforms.push_back(Platform(Vector2{0, GetScreenHeight() - 50}, GetScreenWidth())); // Ground platform
-        platforms.push_back(Platform(Vector2{200, GetScreenHeight() - 150}, 300)); // Upper platform
-        platforms.push_back(Platform(Vector2{500, GetScreenHeight() - 250}, 200)); // Another platform
+    void InitLevel(int lvl) {
+        level = lvl;
+        score = 0;
+        levelCompleted = false;
+        platforms.clear();
+        coins.clear();
+        enemies.clear();
 
-        coins.push_back(Coin(Vector2{300, GetScreenHeight() - 220}));   //2 coins currently 
-        coins.push_back(Coin(Vector2{600, GetScreenHeight() - 370}));
-
-        enemies.push_back(Enemy(Vector2{800, GetScreenHeight() - 100}));    //2 enemies
-        enemies.push_back(Enemy(Vector2{700, GetScreenHeight() - 370}));
+        switch (level) {
+        case 1:
+            InitLevel1();
+            break;
+        case 2:
+            InitLevel2();
+            break;
+        case 3:
+            InitLevel3();
+            break;
+        default:
+            break;
+        }
     }
 
-    void Update()
-    {
+    void InitLevel1() {
+        platforms.push_back(Platform(Vector2{0, float(GetScreenHeight() - 50)}, float(GetScreenWidth())));
+        platforms.push_back(Platform(Vector2{200, float(GetScreenHeight() - 150)}, 300));
+        platforms.push_back(Platform(Vector2{500, float(GetScreenHeight() - 250)}, 200));
+
+        coins.push_back(Coin(Vector2{300, float(GetScreenHeight() - 220)}));
+        coins.push_back(Coin(Vector2{600, float(GetScreenHeight() - 370)}));
+        coins.push_back(Coin(Vector2{800, float(GetScreenHeight() - 400)}));
+        this->coinCounts=3;
+        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, 2.0f));
+        enemies.push_back(Enemy(Vector2{600, float(GetScreenHeight() - 100)}, 4.0f));
+
+    }
+
+    void InitLevel2() {
+        platforms.push_back(Platform(Vector2{0, float(GetScreenHeight() - 50)}, float(GetScreenWidth())));
+        platforms.push_back(Platform(Vector2{200, float(GetScreenHeight() - 150)}, 300));
+        platforms.push_back(Platform(Vector2{500, float(GetScreenHeight() - 250)}, 200));
+        platforms.push_back(Platform(Vector2{800, float(GetScreenHeight() - 350)}, 250));
+        
+        coins.push_back(Coin(Vector2{300, float(GetScreenHeight() - 220)}));
+        coins.push_back(Coin(Vector2{600, float(GetScreenHeight() - 370)}));
+        coins.push_back(Coin(Vector2{850, float(GetScreenHeight() - 400)}));
+        this->coinCounts=3;
+
+        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, 3.0f));
+        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, 3.0f));
+    }
+
+    void InitLevel3() {
+        platforms.push_back(Platform(Vector2{0, float(GetScreenHeight() - 50)}, float(GetScreenWidth())));
+        platforms.push_back(Platform(Vector2{200, float(GetScreenHeight() - 150)}, 300));
+        platforms.push_back(Platform(Vector2{500, float(GetScreenHeight() - 250)}, 200));
+        platforms.push_back(Platform(Vector2{800, float(GetScreenHeight() - 350)}, 250));
+        platforms.push_back(Platform(Vector2{1200, float(GetScreenHeight() - 450)}, 200));
+
+        coins.push_back(Coin(Vector2{300, float(GetScreenHeight() - 220)}));
+        coins.push_back(Coin(Vector2{600, float(GetScreenHeight() - 370)}));
+        coins.push_back(Coin(Vector2{850, float(GetScreenHeight() - 400)}));
+        coins.push_back(Coin(Vector2{1200, float(GetScreenHeight() - 470)}));
+        this->coinCounts=4;
+
+        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, 4.0f));
+        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, 4.0f));
+        enemies.push_back(Enemy(Vector2{950, float(GetScreenHeight() - 370)}, 4.0f));
+    }
+
+    void Update() {
         std::vector<Rectangle> platformRectangles;
-        for (auto& platform : platforms)
-        {
+        for (const auto& platform : platforms) {
             platformRectangles.push_back(platform.boundingBox);
         }
 
         player.Update(platformRectangles);
 
-        for (auto& coin : coins)
-        {
-            if (!coin.isCollected && CheckCollisionRecs(player.boundingBox, coin.boundingBox))
-            {
-                score++;
-                coin.isCollected = true; // Mark coin as collected
+        for (auto& coin : coins) {
+            if (!coin.isCollected && CheckCollisionRecs(player.boundingBox, coin.boundingBox)) {
+                score += 10;
+                coin.isCollected = true;
+                coinCounts--;
+                
             }
         }
 
-        // Update enemies
-        for (auto& enemy : enemies)
-        {
-            enemy.Update(platformRectangles); 
-            if (CheckCollisionRecs(player.boundingBox, enemy.boundingBox))
-            {
-                gameOver(); // If the player collides with an enemy, trigger game over
+        for (auto& enemy : enemies) {
+            enemy.Update(platformRectangles);
+            if (CheckCollisionRecs(player.boundingBox, enemy.boundingBox)) {
+                GameOver();
             }
+        }
+
+        if (coins.empty() || coinCounts==0) {
+            levelCompleted = true;
         }
     }
 
-    void Draw()
-    {
+    void Draw() const {
         player.Draw();
+        for (const auto& platform : platforms) platform.Draw();
+        for (const auto& coin : coins) coin.Draw();
+        for (const auto& enemy : enemies) enemy.Draw();
+        DrawText(TextFormat("Score: %d", score), 10, 10, 20, BLACK);
 
-        // Draw platforms
-        for (auto& platform : platforms)
-        {
-            platform.Draw();
+        if (levelCompleted) {
+            DrawText("Level Completed!", GetScreenWidth() / 2 - 100, GetScreenHeight() / 2, 40, GREEN);
+            DrawText("Press SPACE to continue", GetScreenWidth() / 2 - 130, GetScreenHeight() / 2 + 40, 20, WHITE);
         }
-
-        // Draw coins
-        for (auto& coin : coins)
-        {
-            coin.Draw();
-        }
-
-        // Draw enemies
-        for (auto& enemy : enemies)
-        {
-            enemy.Draw();
-        }
-
-        DrawText(TextFormat("Score: %d", score), 10, 10, 20, WHITE);
     }
 
-    void gameOver()
-    {
+    void GameOver() {
+        gameover=true;
         running = false;
-        score = 0;
-
-        // Reset player position
-        player.position = Vector2{100, GetScreenHeight() - 100};
-        player.isJumping = false;
-        player.velocityY = 0.0f;
-
-        // Reset platforms, coins, enemies (if needed)
-        for (auto& coin : coins)
-        {
-            coin.isCollected = false;
-        }
-
-        for (auto& enemy : enemies)
-        {
-            enemy.position = Vector2{800, GetScreenHeight() - 100};  // Reset enemies' positions as an example
-            enemy.velocityY = 0.0f;
-            enemy.isJumping = false;
-        }
+     
     }
 
-
+    void Start() {
+        running = true;
+        levelCompleted = false;
+    }
 };
 
 #endif
