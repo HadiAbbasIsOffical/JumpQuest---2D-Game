@@ -10,9 +10,18 @@ public:
     int difficulty = 0; // 0 = not selected, 1 = Easy, 2 = Medium, 3 = Hard
     int selectedLevel = 0; // 0 = not selected, 1 = Level 1, 2 = Level 2, 3 = Level 3
     bool showInstructions = false;
+    int score=0;
 
+    void setScore(int score){
+        this->score+=score;
+    }
+
+    
     void Draw() {
         ClearBackground(DARKGRAY);
+        if(viewScores){
+            DrawScoreBoard();
+        }else{
         if (!showInstructions && difficulty == 0) {
             DrawMainMenu();
         } else if (!showInstructions && difficulty > 0 && selectedLevel == 0) {
@@ -23,10 +32,12 @@ public:
             DrawInstructions();
         }
     }
-
+}
     void HandleInput() {
         Vector2 mousePos = GetMousePosition();
-
+        if(viewScores){
+                 DrawScoreBoard();
+        }         
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (!showInstructions && difficulty == 0) {
                 HandleMainMenuInput(mousePos);
@@ -57,20 +68,45 @@ private:
         HighlightOption(350, "3. Exit");
     }
 
+  void DrawScoreBoard() {
+    ClearBackground(DARKGRAY);
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+
+    const char* title = "Scoreboard";
+    int titleFontSize = 50;
+    int titleWidth = MeasureText(title, titleFontSize);
+    const char* scoreText = TextFormat("Your Score: %d", score);
+    int scoreFontSize = 30;
+    int scoreWidth = MeasureText(scoreText, scoreFontSize);
+
+    Rectangle menuButton = {screenWidth / 2 - 100, screenHeight / 2 + 80, 200, 50};
+
+    DrawText(title, screenWidth / 2 - titleWidth / 2, screenHeight / 2 - 150, titleFontSize, GREEN);
+    DrawText(scoreText, screenWidth / 2 - scoreWidth / 2, screenHeight / 2 - 70, scoreFontSize, GREEN);
+
+    DrawRectangleRec(menuButton, LIGHTGRAY);
+    DrawText("Back to Menu", screenWidth / 2 - MeasureText("Back to Menu", 20) / 2, screenHeight / 2 + 95, 20, DARKGRAY);
+
+    if (CheckCollisionPointRec(GetMousePosition(), menuButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+           viewScores=false;
+    }
+}
+
     void DrawDifficultyMenu() {
         DrawText("Select Difficulty", GetScreenWidth() / 2 - MeasureText("Select Difficulty", 30) / 2, 100, 30, WHITE);
         DrawText("1. Easy", GetScreenWidth() / 2 - MeasureText("1. Easy", 20) / 2, 200, 20, WHITE);
         DrawText("2. Medium", GetScreenWidth() / 2 - MeasureText("2. Medium", 20) / 2, 250, 20, WHITE);
         DrawText("3. Hard", GetScreenWidth() / 2 - MeasureText("3. Hard", 20) / 2, 300, 20, WHITE);
+        DrawText("Back To Menu", GetScreenWidth() / 2 - MeasureText("Back To Menu", 20) / 2, 400, 20, BLACK);
 
         HighlightOption(200, "1. Easy");
         HighlightOption(250, "2. Medium");
         HighlightOption(300, "3. Hard");
-    }
-    void ShowScoreBoard(){
+        HighlightOption(400, "Back To Menu");
 
-        
     }
+
     void DrawLevelMenu() {
         DrawText("Select Level", GetScreenWidth() / 2 - MeasureText("Select Level", 30) / 2, 100, 30, WHITE);
             DrawText("1. Level 1", GetScreenWidth() / 2 - MeasureText("1. Level 1", 20) / 2, 200, 20, WHITE);
@@ -93,9 +129,9 @@ private:
 
     void HandleMainMenuInput(const Vector2 &mousePos) {
         if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 250, optionWidth, optionHeight})) {
-            difficulty = 1; // Go to difficulty selection
+            difficulty = 1;
         } else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 300, optionWidth, optionHeight})) {
-            viewScores = true; // View scores
+            viewScores = true; 
         } else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 350, optionWidth, optionHeight})) {
             CloseWindow(); // Exit
         }
@@ -104,34 +140,38 @@ private:
     void HandleDifficultyMenuInput(const Vector2 &mousePos) {
         if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 200, optionWidth, optionHeight})) {
             difficulty = 1; // Easy
-            selectedLevel = 1; // Show Level 1
+            selectedLevel = 1; 
         } else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 250, optionWidth, optionHeight})) {
             difficulty = 2; // Medium
-            selectedLevel = 2; // Show Level 1
+            selectedLevel = 2; 
         } else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 300, optionWidth, optionHeight})) {
             difficulty = 3; // Hard
-            selectedLevel = 3; // Show Level 1
+            selectedLevel = 3; 
         }
+         else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 400, optionWidth, optionHeight})) {
+           viewScores=false;
+           difficulty = 0;
+    }
     }
 
     void HandleLevelMenuInput(const Vector2 &mousePos) {
         if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 200, optionWidth, optionHeight})) {
             if (selectedLevel == 1 || (selectedLevel > 1 && difficulty >= selectedLevel)) {
-                showInstructions = true; // Show instructions
+                showInstructions = true; 
             } else {
-                selectedLevel = 2; // Need to complete Level 1 first
+                selectedLevel = 2;
             }
         } else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 250, optionWidth, optionHeight})) {
             if (selectedLevel >= 2) {
-                showInstructions = true; // Show instructions for Level 2
+                showInstructions = true; 
             } else {
-                selectedLevel = 3; // Need to complete previous level
+                selectedLevel = 3; 
             }
         } else if (CheckCollisionPointRec(mousePos, {GetScreenWidth() / 2 - optionWidth / 2, 300, optionWidth, optionHeight})) {
             if (selectedLevel >= 3) {
-                showInstructions = true; // Show instructions for Level 3
+                showInstructions = true;
             } else {
-                selectedLevel = 4; // Need to complete previous levels
+                selectedLevel = 4; 
             }
         }
     }

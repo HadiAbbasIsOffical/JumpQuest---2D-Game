@@ -6,6 +6,7 @@
 #include <string>
 
 class Player {
+    private:
 public:
     Vector2 position;
     float speed;
@@ -16,6 +17,7 @@ public:
     Rectangle boundingBox;
     Color color;
 
+ 
     Player(Vector2 startPos, Color playerColor)
         : position(startPos), speed(5.0f), jumpHeight(10.0f), isJumping(false),
           gravity(0.5f), velocityY(0.0f), boundingBox{startPos.x, startPos.y, 40, 40},
@@ -159,7 +161,10 @@ public:
 };
 
 class Game {
+
 public:
+        int tempScores=0;
+
     Player player;
     std::vector<Coin> coins;
     int coinCounts;
@@ -172,13 +177,28 @@ public:
     bool levelCompleted;
     bool gameover;
 
+ 
+    void IncScore(int score){
+        this->tempScores+=score;
+    }
+
     Game(Color playerColor = BLUE)
         : player(Vector2{100, float(GetScreenHeight() - 100)}, playerColor),
           score(0), running(true), level(1), difficulty(1), levelCompleted(false) {}
     
     void SetDifficulty(int difficultyLevel) {
-    difficulty = difficultyLevel;
-}
+             difficulty = difficultyLevel;                
+             }
+    float setSpeedOnDifficulty(){
+            if(this->difficulty==1){
+                return 3;
+            }else if(this->difficulty==2){
+                return 4.5;
+            }else{
+                return 6;
+            }
+    }
+
 
     void InitLevel(int lvl) {
         level = lvl;
@@ -212,8 +232,8 @@ public:
         coins.push_back(Coin(Vector2{600, float(GetScreenHeight() - 370)}));
         coins.push_back(Coin(Vector2{800, float(GetScreenHeight() - 400)}));
         this->coinCounts=3;
-        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, 2.0f));
-        enemies.push_back(Enemy(Vector2{600, float(GetScreenHeight() - 100)}, 4.0f));
+        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, setSpeedOnDifficulty()));
+        enemies.push_back(Enemy(Vector2{600, float(GetScreenHeight() - 100)}, setSpeedOnDifficulty()));
 
     }
 
@@ -228,8 +248,8 @@ public:
         coins.push_back(Coin(Vector2{850, float(GetScreenHeight() - 400)}));
         this->coinCounts=3;
 
-        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, 3.0f));
-        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, 3.0f));
+        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, setSpeedOnDifficulty()));
+        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, setSpeedOnDifficulty()));
     }
 
     void InitLevel3() {
@@ -240,14 +260,15 @@ public:
         platforms.push_back(Platform(Vector2{1200, float(GetScreenHeight() - 450)}, 200));
 
         coins.push_back(Coin(Vector2{300, float(GetScreenHeight() - 220)}));
+        coins.push_back(Coin(Vector2{500, float(GetScreenHeight() - 220)}));
         coins.push_back(Coin(Vector2{600, float(GetScreenHeight() - 370)}));
         coins.push_back(Coin(Vector2{850, float(GetScreenHeight() - 400)}));
         coins.push_back(Coin(Vector2{1200, float(GetScreenHeight() - 470)}));
-        this->coinCounts=4;
+        this->coinCounts=5;
 
-        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, 4.0f));
-        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, 4.0f));
-        enemies.push_back(Enemy(Vector2{950, float(GetScreenHeight() - 370)}, 4.0f));
+        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, setSpeedOnDifficulty()));
+        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, setSpeedOnDifficulty()));
+        enemies.push_back(Enemy(Vector2{950, float(GetScreenHeight() - 370)}, setSpeedOnDifficulty()));
     }
 
     void Update() {
@@ -263,9 +284,12 @@ public:
                 score += 10;
                 coin.isCollected = true;
                 coinCounts--;
+                IncScore(score);
+               
+        }
                 
             }
-        }
+        
 
         for (auto& enemy : enemies) {
             enemy.Update(platformRectangles);
@@ -293,12 +317,14 @@ public:
     }
 
     void GameOver() {
+        
         gameover=true;
         running = false;
      
     }
 
     void Start() {
+        
         running = true;
         levelCompleted = false;
     }

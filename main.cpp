@@ -4,6 +4,8 @@
 #include <lose.h>
 #include <raylib.h>
 #include <iostream>
+using namespace std;
+#include<iostream>
 
 int main() {
     InitWindow(1280, 720, "Coin Quest - Hadi, Mishaal, Minaal");
@@ -27,6 +29,9 @@ int main() {
             menu.HandleInput();
             if (menu.startGame) {
                 currentState = GAME;
+                menu.viewScores=false;
+                // game.SetDifficulty(1);
+                // game.InitLevel(1);
                 game.SetDifficulty(menu.difficulty);
                 game.InitLevel(menu.selectedLevel); // Initialize the selected level
                 game.running = true;
@@ -37,6 +42,7 @@ int main() {
             if (game.running) {
                 game.Update();
                 game.Draw();
+                game.gameover = false;
 
                 if (game.levelCompleted) {
                     game.running = false;
@@ -45,37 +51,51 @@ int main() {
 
                 // Assuming you have a condition for losing in your Game class, like:
                 if (game.gameover) { // You need to define gameOver in your Game class
-                    game.running = false;
+                    game.running=false;
                     currentState = LOSE_SCREEN;
                 }
+            }else{
+                currentState=LOSE_SCREEN;
             }
             break;
 
         case WIN_SCREEN:
+
             winscr.Update();
             winscr.Draw(game.score);
 
             if (winscr.goToMenu) {
+                menu.viewScores=false;
+                menu.setScore(game.score);
                 currentState = MENU;
                 winscr.goToMenu = false; // Reset the flag for future use
                 menu.startGame = false;
                 menu.difficulty = 0;
-                menu.viewScores = false;
                 menu.selectedLevel = 0;
-            }
+                game.player.position.x=1;
+                game.player.position.y=1;
+                
+            }   
             break;
 
         case LOSE_SCREEN: // Added LOSE_SCREEN logic
             LSscr.Update();
             LSscr.Draw(game.score);
-
+           // std::cout<<"S"<<endl;
+            //  menu.setScore(tempscore);
             if (LSscr.goToMenu) {
                 currentState = MENU;
+            //std::cout<<game.score;
+            menu.setScore(game.score);
+                menu.viewScores=false;
                 LSscr.goToMenu = false; // Reset the flag for future use
                 menu.startGame = false;
                 menu.difficulty = 0;
-                menu.viewScores = false;
                 menu.selectedLevel = 0;
+                 game.player.position.x=1;
+                game.player.position.y=1;
+                // game.gameover=false;
+            
             }
             break;
         }
