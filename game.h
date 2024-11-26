@@ -96,6 +96,7 @@ public:
         }
     }
 };
+
 class Platform {
 public:
     Vector2 position;
@@ -253,23 +254,38 @@ public:
     }
 
     void InitLevel3() {
+        // Adding ground-level platform
         platforms.push_back(Platform(Vector2{0, float(GetScreenHeight() - 50)}, float(GetScreenWidth())));
-        platforms.push_back(Platform(Vector2{200, float(GetScreenHeight() - 150)}, 300));
-        platforms.push_back(Platform(Vector2{500, float(GetScreenHeight() - 250)}, 200));
-        platforms.push_back(Platform(Vector2{800, float(GetScreenHeight() - 350)}, 250));
-        platforms.push_back(Platform(Vector2{1200, float(GetScreenHeight() - 450)}, 200));
+        
+        // Adding elevated platforms with varying heights and lengths
+        platforms.push_back(Platform(Vector2{150, float(GetScreenHeight() - 150)}, 300)); 
+        platforms.push_back(Platform(Vector2{500, float(GetScreenHeight() - 250)}, 250)); 
+        platforms.push_back(Platform(Vector2{850, float(GetScreenHeight() - 350)}, 300)); 
+        platforms.push_back(Platform(Vector2{1200, float(GetScreenHeight() - 450)}, 150));
+        platforms.push_back(Platform(Vector2{870, float(GetScreenHeight() - 500)}, 200)); // Highest platform
+        platforms.push_back(Platform(Vector2{530, float(GetScreenHeight() - 500)}, 200)); // 2Highest platform
 
-        coins.push_back(Coin(Vector2{300, float(GetScreenHeight() - 220)}));
-        coins.push_back(Coin(Vector2{500, float(GetScreenHeight() - 220)}));
-        coins.push_back(Coin(Vector2{600, float(GetScreenHeight() - 370)}));
-        coins.push_back(Coin(Vector2{850, float(GetScreenHeight() - 400)}));
-        coins.push_back(Coin(Vector2{1200, float(GetScreenHeight() - 470)}));
-        this->coinCounts=5;
+        // Adding coins across different platforms and positions
+        coins.push_back(Coin(Vector2{200, float(GetScreenHeight() - 170)})); // On first elevated platform
+        coins.push_back(Coin(Vector2{350, float(GetScreenHeight() - 170)}));
+        coins.push_back(Coin(Vector2{550, float(GetScreenHeight() - 270)})); // On second platform
+        coins.push_back(Coin(Vector2{700, float(GetScreenHeight() - 270)})); // Between platforms
+        coins.push_back(Coin(Vector2{900, float(GetScreenHeight() - 370)})); // On third platform
+        coins.push_back(Coin(Vector2{1050, float(GetScreenHeight() - 370)}));
+        coins.push_back(Coin(Vector2{1250, float(GetScreenHeight() - 470)})); // On fourth platform
+        coins.push_back(Coin(Vector2{800, float(GetScreenHeight() - 620)}));  // On highest platform
+        coins.push_back(Coin(Vector2{360, float(GetScreenHeight() - 530)}));
+        
+        this->coinCounts = 9; // Total number of coins
+    enemies.push_back(Enemy(Vector2{300, float(GetScreenHeight() - 100)}, setSpeedOnDifficulty())); // Ground level
+    enemies.push_back(Enemy(Vector2{600, float(GetScreenHeight() - 270)}, setSpeedOnDifficulty())); // Near second platform
+    enemies.push_back(Enemy(Vector2{850, float(GetScreenHeight() - 400)}, setSpeedOnDifficulty())); // Near third platform
+      enemies.push_back(Enemy(Vector2{850, float(GetScreenHeight() - 540)}, setSpeedOnDifficulty())); // Near third platform
 
-        enemies.push_back(Enemy(Vector2{350, float(GetScreenHeight() - 200)}, setSpeedOnDifficulty()));
-        enemies.push_back(Enemy(Vector2{650, float(GetScreenHeight() - 320)}, setSpeedOnDifficulty()));
-        enemies.push_back(Enemy(Vector2{950, float(GetScreenHeight() - 370)}, setSpeedOnDifficulty()));
+        // Adding enemies with varying positions and difficulties
+       
     }
+
 
     void Update() {
         std::vector<Rectangle> platformRectangles;

@@ -8,7 +8,7 @@ using namespace std;
 #include<iostream>
 
 int main() {
-    InitWindow(1280, 720, "Coin Quest - Hadi, Mishaal, Minaal");
+    InitWindow(1920, 1080, "Coin Quest - Hadi, Mishaal, Minaal");
     SetTargetFPS(60);
 
     Game game;
